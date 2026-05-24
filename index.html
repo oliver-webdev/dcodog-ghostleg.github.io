@@ -215,7 +215,7 @@
 
             <!-- Auto Setup via Text Paste -->
             <label class="block text-lg font-bold mb-4 text-neon-blue">명단 자동 세팅 (선곡 리스트 붙여넣기)</label>
-            <textarea id="paste-area" class="w-full h-32 bg-gray-800/50 text-gray-200 border border-gray-500 rounded-xl p-4 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue focus:outline-none resize-none mb-4 custom-scrollbar" placeholder="여기에 카카오톡 명단 텍스트를 붙여넣으세요...&#10;(예: 1. 민규&#10;     2. 호현)"></textarea>
+            <textarea id="paste-area" class="w-full h-32 bg-gray-800/50 text-gray-200 border border-gray-500 rounded-xl p-4 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue focus:outline-none resize-none mb-4 custom-scrollbar" placeholder="여기에 선곡 리스트 텍스트를 붙여넣으세요...&#10;(예: 1. 철수&#10;     2. 영희)"></textarea>
             <button id="btn-auto-setup" class="btn-neon btn-neon-blue w-full py-4 rounded-xl text-xl font-title tracking-wider">
                 명단 붙여넣어 세팅하기 📋
             </button>
@@ -359,7 +359,7 @@
         function parseTextAndSetup(text) {
             const lines = text.split('\n');
             const names = [];
-            // "1. 민규" 혹은 "1.민규" 형식의 텍스트에서 이름 추출을 위한 정규식
+            // "1. 철수" 혹은 "1.철수" 형식의 텍스트에서 이름 추출을 위한 정규식
             const nameRegex = /^\d+\.\s*(.+)$/; 
 
             for (let line of lines) {
@@ -370,7 +370,7 @@
             }
 
             if (names.length < 2) {
-                alert('참가자 명단을 제대로 읽지 못했습니다. 최소 2명 이상의 "번호. 이름" (예: 1. 민규) 형식이 포함되어야 합니다.');
+                alert('참가자 명단을 제대로 읽지 못했습니다. 최소 2명 이상의 "번호. 이름" (예: 1. 철수) 형식이 포함되어야 합니다.');
                 return;
             }
 
