@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디코독 경연 순서</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'stage-bg': '#0f172a',    // Dark navy
+                        'stage-dark': '#020617',  // Very dark
+                        'neon-pink': '#ec4899',   // Pink-500
+                        'neon-blue': '#3b82f6',   // Blue-500
+                        'neon-purple': '#8b5cf6', // Violet-500
+                    },
+                    fontFamily: {
+                        'title': ['Jua', 'sans-serif'],
+                        'body': ['Gowun Dodum', 'Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Title Neon Effect */
+        .neon-text {
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #ec4899,
+                0 0 40px #ec4899,
+                0 0 80px #ec4899;
+        }
+
+        /* Glassmorphism containers */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Input Styles */
+        input[type="number"], .name-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus, .name-input:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Button Styles */
+        .btn-neon {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #ec4899;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-neon:hover {
+            background: #ec4899;
+            color: white;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), 0 0 40px rgba(236, 72, 153, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-neon-blue {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        .btn-neon-blue:hover {
+            background: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Ladder Area Area */
+        #ladder-area {
+            position: relative;
+            margin: 40px 0;
+            padding: 20px 0;
+            /* Spotlight effect */
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+
+        canvas {
+            position: absolute;
+            top: 40px; /* Leave space for inputs */
+            left: 0;
+            z-index: 10;
+        }
+
+        .nodes-container {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+            z-index: 20;
+            width: 100%;
+            padding: 0 10px; /* Slight padding to prevent edge cutoffs */
+        }
+
+        /* Top Nodes (Singer Names) */
+        .name-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .mic-icon {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+            color: #cbd5e1;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+
+        /* Bottom Nodes (Order Results) */
+        .result-node {
+            background: #1e293b;
+            color: #f8fafc;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid #64748b;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-family: 'Jua', sans-serif;
+        }
+        .result-node.highlighted {
+            border-color: #ec4899;
+            box-shadow: 0 0 15px #ec4899;
+            color: #ec4899;
+            transform: scale(1.1);
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Modal Setlist Theme */
+        #capture-area {
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="%231e1b4b"/><circle cx="50" cy="50" r="40" fill="none" stroke="%23312e81" stroke-width="2"/></svg>');
+            background-color: #1e1b4b; /* Deep background for setlist */
+        }
+        .setlist-item {
+            background: rgba(15, 23, 42, 0.8);
+            border-left: 4px solid #ec4899;
+            transition: transform 0.2s;
+        }
+        .setlist-item:hover {
+            transform: translateX(5px);
+            background: rgba(30, 41, 59, 0.9);
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center py-10 px-4">
+
+    <div class="w-full max-w-4xl mx-auto flex flex-col items-center">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h3 class="text-neon-blue font-bold tracking-widest uppercase text-sm mb-2 opacity-80">DCODOG</h3>
+            <h1 class="text-5xl md:text-6xl font-title neon-text mb-4">경연 순서 정하기</h1>
+            <p class="text-gray-300 text-lg">오늘의 무대 순서를 확인하세요! 🎤</p>
+        </div>
+
+        <!-- Setup Section -->
+        <div id="setup-section" class="glass-panel rounded-2xl p-6 md:p-8 w-full max-w-md text-center mb-8 z-10">
+            <!-- Manual Setup -->
+            <label for="num-players" class="block text-xl font-bold mb-4 text-gray-200">직접 설정 (2~16명)</label>
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <input type="number" id="num-players" min="2" max="16" value="4" 
+                       class="w-24 text-center text-2xl font-bold p-3 rounded-lg">
+                <span class="text-xl text-gray-400">명</span>
+            </div>
+            <button id="btn-create" class="btn-neon w-full py-4 rounded-xl text-xl font-title tracking-wider mb-6">
+                직접 사다리 세팅하기 🎸
+            </button>
+
+            <!-- Divider -->
+            <div class="flex items-center my-6">
+                <div class="flex-grow border-t border-gray-600"></div>
+                <span class="px-4 text-sm text-gray-400 font-bold uppercase tracking-widest">or</span>
+                <div class="flex-grow border-t border-gray-600"></div>
+            </div>
+
+            <!-- Auto Setup via Text Paste -->
+            <label class="block text-lg font-bold mb-4 text-neon-blue">명단 자동 세팅 (텍스트 붙여넣기)</label>
+            <textarea id="paste-area" class="w-full h-32 bg-gray-800/50 text-gray-200 border border-gray-500 rounded-xl p-4 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue focus:outline-none resize-none mb-4 custom-scrollbar" placeholder="여기에 카카오톡 명단 텍스트를 붙여넣으세요...&#10;(예: 1. 민규&#10;     2. 호현)"></textarea>
+            <button id="btn-auto-setup" class="btn-neon btn-neon-blue w-full py-4 rounded-xl text-xl font-title tracking-wider">
+                명단 붙여넣기로 세팅하기 📋
+            </button>
+        </div>
+
+        <!-- Ladder Game Section -->
+        <div id="game-section" class="w-full relative hidden glass-panel rounded-3xl p-4 md:p-8 pb-20 shadow-2xl">
+            <!-- Top Input Nodes (Singers) -->
+            <div id="top-nodes" class="nodes-container mb-4"></div>
+            
+            <!-- Ladder Canvas -->
+            <div id="ladder-area" class="w-full h-[400px]">
+                <canvas id="ladder-canvas"></canvas>
+            </div>
+            
+            <!-- Bottom Result Nodes (Order) -->
+            <div id="bottom-nodes" class="nodes-container mt-4"></div>
+
+            <!-- Action Buttons -->
+            <div class="mt-12 flex gap-4 w-full max-w-lg mx-auto justify-center relative z-20">
+                <button id="btn-re-setup" class="btn-neon px-6 py-3 rounded-full text-lg font-title flex-1 shadow-lg text-gray-300 !border-gray-500 hover:!bg-gray-800 hidden">
+                    ⚙️ 세팅 변경
+                </button>
+                <button id="btn-start" class="btn-neon btn-neon-blue px-6 py-3 rounded-full text-lg font-title flex-1 shadow-lg">
+                    경연 시작! ▶
+                </button>
+                <button id="btn-skip" class="btn-neon px-6 py-3 rounded-full text-lg font-title flex-1 shadow-lg hidden">
+                    결과 바로보기 ⏭
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Summary Modal -->
+    <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 backdrop-blur-sm">
+        <div class="bg-stage-dark border border-gray-700 rounded-2xl shadow-2xl p-4 md:p-6 w-11/12 max-w-md transform transition-all flex flex-col max-h-[90vh]">
+            
+            <div id="capture-area" class="p-6 rounded-xl relative overflow-hidden">
+                <!-- Decorative element for Setlist -->
+                <div class="absolute top-0 right-0 p-4 opacity-20">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
+                
+                <h2 class="text-3xl font-title text-center mb-6 text-white tracking-widest border-b border-gray-600 pb-4">
+                    🎤 경연 순서표 🎤
+                </h2>
+                
+                <div id="result-list" class="space-y-3 mb-2 overflow-y-auto pr-2 custom-scrollbar" style="max-height: 50vh;">
+                    <!-- Result items injected here -->
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button id="btn-save-image" class="btn-neon w-full py-3 rounded-lg text-base flex-1 flex justify-center items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    이미지로 저장
+                </button>
+                <button id="btn-close-modal" class="bg-gray-700 hover:bg-gray-600 text-white w-full py-3 rounded-lg text-base flex-1 transition-colors">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const setupSection = document.getElementById('setup-section');
+        const gameSection = document.getElementById('game-section');
+        const topNodesContainer = document.getElementById('top-nodes');
+        const bottomNodesContainer = document.getElementById('bottom-nodes');
+        const canvas = document.getElementById('ladder-canvas');
+        const ctx = canvas.getContext('2d');
+        const btnCreate = document.getElementById('btn-create');
+        const btnStart = document.getElementById('btn-start');
+        const btnSkip = document.getElementById('btn-skip');
+        const btnReSetup = document.getElementById('btn-re-setup');
+        
+        // Settings
+        let numPlayers = 4;
+        const maxPlayers = 16;
+        let canvasWidth, canvasHeight;
+        let verticalLines = []; // {x: position, y1: top, y2: bottom}
+        let horizontalLines = []; // {x1, x2, y}
+        
+        // State
+        let isAnimating = false;
+        let animationRequestId;
+        let activeAnimations = []; // Store state for all simultaneously animating paths
+        let paths = []; // Stores the pre-calculated path for each player
+        let autoNames = []; // Store parsed names from file
+
+        // Modern color palette for 16 players (Neon/Bright themes)
+        const colors = [
+            '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#84cc16',
+            '#f43f5e', '#6366f1', '#14b8a6', '#f59e0b', '#d946ef', '#f97316', '#0ea5e9', '#22c55e'
+        ];
+
+        // 1. Initialize Game Layout
+        btnCreate.addEventListener('click', () => {
+            const inputVal = parseInt(document.getElementById('num-players').value);
+            if (isNaN(inputVal) || inputVal < 2 || inputVal > maxPlayers) {
+                alert(`2명에서 ${maxPlayers}명 사이의 숫자를 입력해주세요.`);
+                return;
+            }
+            numPlayers = inputVal;
+            
+            // UI 리셋
+            btnStart.classList.remove('hidden');
+            btnStart.innerText = '경연 시작! ▶';
+            btnReSetup.classList.remove('hidden');
+            btnSkip.classList.add('hidden');
+            
+            autoNames = []; // 수동 설정 시 자동 이름 데이터 초기화
+            setupGame();
+        });
+
+        // ------------------ 텍스트 붙여넣기 자동 세팅 로직 시작 ------------------
+        const btnAutoSetup = document.getElementById('btn-auto-setup');
+        const pasteArea = document.getElementById('paste-area');
+
+        btnAutoSetup.addEventListener('click', () => {
+            const text = pasteArea.value.trim();
+            if (!text) {
+                alert("명단 텍스트를 붙여넣어 주세요.");
+                return;
+            }
+            parseTextAndSetup(text);
+        });
+
+        function parseTextAndSetup(text) {
+            const lines = text.split('\n');
+            const names = [];
+            // "1. 민규" 혹은 "1.민규" 형식의 텍스트에서 이름 추출을 위한 정규식
+            const nameRegex = /^\d+\.\s*(.+)$/; 
+
+            for (let line of lines) {
+                const match = line.trim().match(nameRegex);
+                if (match) {
+                    names.push(match[1].trim()); // 곡 정보는 무시하고 이름만 배열에 추가
+                }
+            }
+
+            if (names.length < 2) {
+                alert('참가자 명단을 제대로 읽지 못했습니다. 최소 2명 이상의 "번호. 이름" (예: 1. 민규) 형식이 포함되어야 합니다.');
+                return;
+            }
+
+            if (names.length > maxPlayers) {
+                alert(`최대 참가 인원은 ${maxPlayers}명입니다. 처음 ${maxPlayers}명만 로드합니다.`);
+                names.splice(maxPlayers);
+            }
+
+            autoNames = names;
+            numPlayers = autoNames.length;
+            document.getElementById('num-players').value = numPlayers; // 수동 입력 폼 숫자도 동기화
+
+            // UI 리셋
+            btnStart.classList.remove('hidden');
+            btnStart.innerText = '경연 시작! ▶';
+            btnReSetup.classList.remove('hidden');
+            btnSkip.classList.add('hidden');
+            
+            setupGame(true); // 자동 설정 모드로 게임 세팅
+        }
+        // ------------------ 텍스트 붙여넣기 자동 세팅 로직 끝 ------------------
+
+        // 다시 세팅하기 로직
+        btnReSetup.addEventListener('click', () => {
+            gameSection.classList.add('hidden');
+            setupSection.style.display = 'block';
+            if (isAnimating) {
+                cancelAnimationFrame(animationRequestId);
+                isAnimating = false;
+            }
+        });
+
+        function setupGame(isAuto = false) {
+            setupSection.style.display = 'none';
+            gameSection.classList.remove('hidden');
+            
+            topNodesContainer.innerHTML = '';
+            bottomNodesContainer.innerHTML = '';
+            
+            // Adjust canvas to fit container
+            const ladderArea = document.getElementById('ladder-area');
+            canvasWidth = ladderArea.clientWidth;
+            canvasHeight = ladderArea.clientHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            const spacing = canvasWidth / (numPlayers + 1);
+
+            // Generate Top Nodes (Inputs) and Bottom Nodes (Results)
+            let resultValues = Array.from({length: numPlayers}, (_, i) => i + 1);
+            // Shuffle results
+            for (let i = resultValues.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [resultValues[i], resultValues[j]] = [resultValues[j], resultValues[i]];
+            }
+
+            for (let i = 0; i < numPlayers; i++) {
+                // Calculate dynamic widths/sizes based on number of players
+                const inputWidth = numPlayers > 10 ? 'w-12 text-xs' : numPlayers > 6 ? 'w-16 text-sm' : 'w-20 text-base';
+                const nodeSize = numPlayers > 10 ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-lg';
+
+                // Top Node (Mic + Input)
+                const topWrapper = document.createElement('div');
+                topWrapper.className = 'name-input-wrapper';
+                topWrapper.style.width = `${spacing}px`;
+                
+                const mic = document.createElement('div');
+                mic.className = 'mic-icon';
+                mic.innerHTML = '🎤';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = `name-input ${inputWidth} text-center py-1 rounded shadow-inner text-white`;
+                
+                if (isAuto && autoNames[i]) {
+                    input.value = autoNames[i];
+                } else {
+                    input.placeholder = `참여${i+1}`;
+                }
+                
+                topWrapper.appendChild(mic);
+                topWrapper.appendChild(input);
+                topNodesContainer.appendChild(topWrapper);
+
+                // Bottom Node (Result Order)
+                const bottomWrapper = document.createElement('div');
+                bottomWrapper.style.width = `${spacing}px`;
+                bottomWrapper.className = 'flex justify-center';
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result-node ${nodeSize}`;
+                resultDiv.innerText = resultValues[i];
+                bottomWrapper.appendChild(resultDiv);
+                
+                bottomNodesContainer.appendChild(bottomWrapper);
+            }
+
+            generateLadderBase();
+        }
+
+        // 2. Generate Ladder Logic
+        function generateLadderBase() {
+            verticalLines = [];
+            horizontalLines = [];
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            const spacing = canvasWidth / (numPlayers + 1);
+
+            // Draw Vertical lines (Neon string feel)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+
+            for (let i = 0; i < numPlayers; i++) {
+                const x = spacing * (i + 1);
+                verticalLines.push(x);
+                
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvasHeight);
+                ctx.stroke();
+            }
+
+            // Generate Horizontal lines (Grid-based approach for dense, even distribution)
+            const yPadding = 40;
+            const availableHeight = canvasHeight - (yPadding * 2);
+            // 인원수에 비례하여 가로줄 밀도 증가 (최소 8줄 ~ 최대 20줄)
+            const numRows = Math.min(20, Math.max(8, Math.floor(numPlayers * 1.8))); 
+            const rowHeight = availableHeight / numRows;
+
+            for (let r = 0; r < numRows; r++) {
+                const baseY = yPadding + r * rowHeight;
+                
+                for (let gap = 0; gap < numPlayers - 1; gap++) {
+                    // 각 구간마다 50%의 확률로 다리 생성
+                    if (Math.random() > 0.5) { 
+                        const x1 = verticalLines[gap];
+                        const x2 = verticalLines[gap + 1];
+                        // 약간의 Y축 지터링(랜덤 오프셋)을 주어 기계적인 느낌 완화
+                        const jitterY = baseY + (Math.random() * 10 - 5);
+                        
+                        horizontalLines.push({ x1, x2, y: jitterY });
+                        
+                        // 다리가 겹쳐서 모호해지는 것을 방지하기 위해 다음 갭은 건너뜀
+                        gap++; 
+                    }
+                }
+            }
+
+            // Sort horizontal lines by Y for proper traversal
+            horizontalLines.sort((a, b) => a.y - b.y);
+
+            // Draw Horizontal lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 3;
+            horizontalLines.forEach(line => {
+                ctx.beginPath();
+                ctx.moveTo(line.x1, line.y);
+                ctx.lineTo(line.x2, line.y);
+                ctx.stroke();
+            });
+        }
+
+        // 3. Animation Logic
+        btnStart.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            // 결과 다시보기 모드일 경우 애니메이션 생략하고 모달만 띄움
+            if (btnStart.innerText === '결과 다시보기') {
+                document.getElementById('result-modal').classList.remove('hidden');
+                return;
+            }
+            
+            btnStart.classList.add('hidden');
+            btnReSetup.classList.add('hidden'); // 진행중에는 세팅 변경 숨김
+            btnSkip.classList.remove('hidden');
+
+            isAnimating = true;
+            
+            // Disable inputs
+            document.querySelectorAll('.name-input').forEach(input => input.disabled = true);
+
+            paths = [];
+            for (let i = 0; i < numPlayers; i++) {
+                paths.push(calculatePath(i));
+            }
+
+            animateAllPathsSimultaneously();
+        });
+
+        // Skip animation and show results immediately
+        btnSkip.addEventListener('click', () => {
+            if (!isAnimating) return;
+            
+            cancelAnimationFrame(animationRequestId);
+            isAnimating = false;
+            
+            // Draw all complete paths instantly
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            drawBaseLadder(); // Redraw base lines
+            
+            for(let i=0; i<numPlayers; i++){
+                drawCompletePath(paths[i], colors[i % colors.length]);
+            }
+            
+            // Highlight all bottom nodes
+            const bottomNodes = bottomNodesContainer.querySelectorAll('.result-node');
+            bottomNodes.forEach(node => node.classList.add('highlighted'));
+
+            setTimeout(() => {
+                showResults();
+                btnSkip.classList.add('hidden');
+                btnStart.classList.remove('hidden');
+                btnReSetup.classList.remove('hidden');
+                btnStart.innerText = '결과 다시보기';
+            }, 300);
+        });
+
+        function calculatePath(startIndex) {
+            let currentX = verticalLines[startIndex];
+            let currentY = 0;
+            let path = [{ x: currentX, y: currentY }];
+
+            // Traverse downwards
+            for (let i = 0; i < horizontalLines.length; i++) {
+                const line = horizontalLines[i];
+                if (line.y > currentY) {
+                    if (Math.abs(line.x1 - currentX) < 1) { // Floating point comparison tolerance
+                        path.push({ x: currentX, y: line.y }); // Move down to bridge
+                        currentX = line.x2; // Cross bridge right
+                        path.push({ x: currentX, y: line.y });
+                        currentY = line.y;
+                    } else if (Math.abs(line.x2 - currentX) < 1) {
+                        path.push({ x: currentX, y: line.y }); // Move down to bridge
+                        currentX = line.x1; // Cross bridge left
+                        path.push({ x: currentX, y: line.y });
+                        currentY = line.y;
+                    }
+                }
+            }
+            
+            // Move to final bottom position
+            path.push({ x: currentX, y: canvasHeight });
+            return path;
+        }
+
+        // Helper to redraw base ladder during animation frames
+        function drawBaseLadder() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+            verticalLines.forEach(x => {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasHeight); ctx.stroke();
+            });
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 3;
+            horizontalLines.forEach(line => {
+                ctx.beginPath(); ctx.moveTo(line.x1, line.y); ctx.lineTo(line.x2, line.y); ctx.stroke();
+            });
+        }
+
+        // Helper to draw fully completed paths (used in skip)
+        function drawCompletePath(path, color) {
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].x, path[i].y);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            // Neon glow effect for paths
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        function animateAllPathsSimultaneously() {
+            activeAnimations = [];
+            // 모든 플레이어의 애니메이션 상태 초기화
+            for (let i = 0; i < numPlayers; i++) {
+                activeAnimations.push({
+                    path: paths[i],
+                    color: colors[i % colors.length],
+                    segmentIndex: 0,
+                    progress: 0,
+                    currentPathProgress: [{x: paths[i][0].x, y: paths[i][0].y}],
+                    isFinished: false
+                });
+            }
+
+            const speed = 0.08; // 동시 재생 시 너무 빠르면 어지러우므로 속도 조절
+
+            function step() {
+                if(!isAnimating) return; 
+                
+                let allFinished = true;
+
+                for (let i = 0; i < numPlayers; i++) {
+                    let anim = activeAnimations[i];
+                    if (anim.isFinished) continue;
+
+                    allFinished = false; // 하나라도 안 끝났으면 계속
+                    anim.progress += speed;
+
+                    if (anim.progress >= 1) {
+                        anim.progress = 0;
+                        anim.currentPathProgress.push({x: anim.path[anim.segmentIndex+1].x, y: anim.path[anim.segmentIndex+1].y});
+                        anim.segmentIndex++;
+
+                        if (anim.segmentIndex >= anim.path.length - 1) {
+                            anim.isFinished = true;
+                            // 도착한 하단 노드 하이라이트
+                            const finalX = anim.path[anim.path.length - 1].x;
+                            const spacing = canvasWidth / (numPlayers + 1);
+                            const nodeIndex = Math.round(finalX / spacing) - 1;
+                            const bottomNodes = bottomNodesContainer.querySelectorAll('.result-node');
+                            if(bottomNodes[nodeIndex]){
+                                bottomNodes[nodeIndex].classList.add('highlighted');
+                                bottomNodes[nodeIndex].style.borderColor = anim.color;
+                                bottomNodes[nodeIndex].style.boxShadow = `0 0 15px ${anim.color}`;
+                            }
+                        }
+                    } else {
+                        const startP = anim.path[anim.segmentIndex];
+                        const endP = anim.path[anim.segmentIndex + 1];
+                        const currentX = startP.x + (endP.x - startP.x) * anim.progress;
+                        const currentY = startP.y + (endP.y - startP.y) * anim.progress;
+                        
+                        if(anim.currentPathProgress.length > anim.segmentIndex + 1) {
+                             anim.currentPathProgress[anim.segmentIndex + 1] = {x: currentX, y: currentY};
+                        } else {
+                             anim.currentPathProgress.push({x: currentX, y: currentY});
+                        }
+                    }
+                }
+
+                renderCanvasFrameSimultaneous();
+
+                if (allFinished) {
+                    isAnimating = false;
+                    setTimeout(() => {
+                        showResults();
+                        btnSkip.classList.add('hidden');
+                        btnReSetup.classList.remove('hidden');
+                        btnStart.classList.remove('hidden');
+                        btnStart.innerText = '결과 다시보기';
+                    }, 800);
+                } else {
+                    animationRequestId = requestAnimationFrame(step);
+                }
+            }
+
+            animationRequestId = requestAnimationFrame(step);
+        }
+
+        function renderCanvasFrameSimultaneous() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            drawBaseLadder();
+
+            for (let i = 0; i < numPlayers; i++) {
+                const anim = activeAnimations[i];
+                const color = anim.color;
+
+                ctx.beginPath();
+                ctx.moveTo(anim.currentPathProgress[0].x, anim.currentPathProgress[0].y);
+                for (let j = 1; j < anim.currentPathProgress.length; j++) {
+                    ctx.lineTo(anim.currentPathProgress[j].x, anim.currentPathProgress[j].y);
+                }
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 4;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 10;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                
+                // 선행하는 빛나는 점(Dot) 그리기
+                if (!anim.isFinished && anim.currentPathProgress.length > 0) {
+                    const lastPos = anim.currentPathProgress[anim.currentPathProgress.length - 1];
+                    ctx.beginPath();
+                    ctx.arc(lastPos.x, lastPos.y, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = 15;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        // 4. Result Formatting and Display
+        function showResults() {
+            const resultList = document.getElementById('result-list');
+            resultList.innerHTML = '';
+            
+            const inputs = topNodesContainer.querySelectorAll('input');
+            const bottomNodes = bottomNodesContainer.querySelectorAll('.result-node');
+            const spacing = canvasWidth / (numPlayers + 1);
+            
+            let resultsArray = [];
+
+            for(let i = 0; i < numPlayers; i++) {
+                const playerName = inputs[i].value.trim() || `참가자${i+1}`;
+                const path = paths[i];
+                const lastX = path[path.length - 1].x;
+                const finalIndex = Math.round(lastX / spacing) - 1;
+                const resultValue = parseInt(bottomNodes[finalIndex].innerText, 10);
+                
+                resultsArray.push({
+                    playerName: playerName,
+                    resultValue: resultValue,
+                    color: colors[i % colors.length]
+                });
+            }
+
+            // Sort by Order (Ascending)
+            resultsArray.sort((a, b) => a.resultValue - b.resultValue);
+
+            // Generate DOM for results
+            resultsArray.forEach(res => {
+                const item = document.createElement('div');
+                item.className = 'setlist-item flex justify-between items-center p-4 rounded-lg shadow-sm';
+                item.style.borderLeftColor = res.color;
+                
+                item.innerHTML = `
+                    <div class="flex items-baseline w-16 shrink-0">
+                        <span class="font-title font-bold text-white text-3xl mr-1">${res.resultValue}</span>
+                        <span class="font-bold text-gray-400 text-sm">번째</span>
+                    </div>
+                    <div class="flex items-center gap-4 flex-1 justify-end">
+                        <span class="font-title font-semibold text-gray-100 text-xl tracking-wide">${res.playerName}</span>
+                        <div class="w-3 h-8 rounded-sm shadow-sm" style="background-color: ${res.color}; box-shadow: 0 0 8px ${res.color}80"></div>
+                    </div>
+                `;
+                resultList.appendChild(item);
+            });
+            
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+
+        // Save Image functionality
+        document.getElementById('btn-save-image').addEventListener('click', () => {
+            const captureArea = document.getElementById('capture-area');
+            const resultList = document.getElementById('result-list');
+            const modalContainer = captureArea.parentElement;
+            const btnSave = document.getElementById('btn-save-image');
+            
+            const originalText = btnSave.innerHTML;
+            btnSave.innerHTML = "저장 중... ⏳";
+            
+            // Expand fully for capture
+            const originalMaxHeight = resultList.style.maxHeight;
+            const originalOverflow = resultList.style.overflowY;
+            const originalModalMaxHeight = modalContainer.style.maxHeight;
+            
+            resultList.style.maxHeight = 'none';
+            resultList.style.overflowY = 'visible';
+            modalContainer.style.maxHeight = 'none'; // 모달 전체의 높이 제한도 해제
+            captureArea.classList.remove('overflow-hidden'); // 캡처 영역의 overflow 제한 해제
+
+            // DOM 렌더링 업데이트를 위한 짧은 지연 시간(setTimeout) 추가
+            setTimeout(() => {
+                html2canvas(captureArea, {
+                    backgroundColor: '#1e1b4b', // Match dark theme
+                    scale: 2, // High res
+                    windowHeight: captureArea.scrollHeight + 50 // 캔버스 전체 높이를 충분히 확보
+                }).then(canvas => {
+                    // Restore styles
+                    resultList.style.maxHeight = originalMaxHeight;
+                    resultList.style.overflowY = originalOverflow;
+                    modalContainer.style.maxHeight = originalModalMaxHeight;
+                    captureArea.classList.add('overflow-hidden');
+                    btnSave.innerHTML = originalText;
+
+                    // Download
+                    const link = document.createElement('a');
+                    link.download = '디코독_경연순서_SETLIST.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }, 100);
+        });
+
+        // Close Modal
+        document.getElementById('btn-close-modal').addEventListener('click', () => {
+            document.getElementById('result-modal').classList.add('hidden');
+        });
+
+        // Window resize handler to rebuild layout if needed
+        window.addEventListener('resize', () => {
+            if (!isAnimating && document.getElementById('ladder-area').clientWidth > 0 && gameSection.classList.contains('hidden') === false) {
+                 setupGame(); // Redraw static board
+            }
+        });
+    </script>
+</body>
+</html>
